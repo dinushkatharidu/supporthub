@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: supporthub-api
+  neo4j:
+    uri: "neo4j+s://25a03ddb.databases.neo4j.io"
+    authentication:
+          username: "neo4j"
+          password: "quUm5dFRlM2JS3VJbkQnnBxti0sPa_1Nxwzs6VNDYtU"
+
+server:
+  port: 8080
+
+
+logging:
+  level:
+    org.springframework.data.neo4j: INFO
