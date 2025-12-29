@@ -1,5 +1,6 @@
 package com.asdt.supporthub.ticket.domain;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,14 @@ public class Ticket {
     private String title;
     private Priority priority;
     private TicketStatus status;
-    private LocalDate date;
+    private LocalDate createdAt;
 
+
+    public Ticket(String title,Priority priority) {
+        this.title = title;
+        this.priority = priority;
+        this.status = TicketStatus.OPEN;
+        this.createdAt = LocalDate.now();
+    }
 
 }
