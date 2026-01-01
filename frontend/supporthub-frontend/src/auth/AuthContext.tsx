@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { AuthResponse, Role } from "../types/auth";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import type { Role } from "../types/auth";
 import * as authApi from "../api/auth";
 
 type AuthUser = {
@@ -12,6 +18,7 @@ type AuthContextType = {
   token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   hasRole: (...roles: Role[]) => boolean;
 };
@@ -41,7 +48,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await authApi.login({ email, password });
 
     localStorage.setItem(TOKEN_KEY, data.token);
-    localStorage.setItem(USER_KEY, JSON.stringify({ email: data.email, roles: data.roles }));
+    localStorage.setItem(
+      USER_KEY,
+      JSON.stringify({ email: data.email, roles: data.roles })
+    );
+
+    setToken(data.token);
+    setUser({ email: data.email, roles: data.roles });
+  }
+
+  async function register(email: string, password: string) {
+    const data = await authApi.register({ email, password });
+
+    localStorage.setItem(TOKEN_KEY, data.token);
+    localStorage.setItem(
+      USER_KEY,
+      JSON.stringify({ email: data.email, roles: data.roles })
+    );
 
     setToken(data.token);
     setUser({ email: data.email, roles: data.roles });
@@ -60,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const value = useMemo(
-    () => ({ user, token, isAuthenticated, login, logout, hasRole }),
+    () => ({ user, token, isAuthenticated, login, register, logout, hasRole }),
     [user, token, isAuthenticated]
   );
 

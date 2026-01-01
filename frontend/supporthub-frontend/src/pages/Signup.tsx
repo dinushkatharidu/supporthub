@@ -2,24 +2,36 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-export default function Login() {
-  const { login } = useAuth();
+export default function Signup() {
+  const { register } = useAuth();
   const nav = useNavigate();
 
-  const [email, setEmail] = useState("admin@test.com");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
+
+    if (password.length < 6) {
+      setErr("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErr("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await login(email, password);
+      await register(email, password);
       nav("/", { replace: true });
     } catch (e: any) {
-      setErr(e?.response?.data?.message ?? "Login failed");
+      setErr(e?.response?.data?.message ?? "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -34,7 +46,7 @@ export default function Login() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">SupportHub</h1>
-            <p className="text-sm text-slate-400">Sign in to manage tickets</p>
+            <p className="text-sm text-slate-400">Create your user account</p>
           </div>
         </div>
 
@@ -61,6 +73,17 @@ export default function Login() {
             />
           </div>
 
+          <div>
+            <label className="text-sm text-slate-300">Confirm Password</label>
+            <input
+              className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500/40"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              type="password"
+              required
+            />
+          </div>
+
           {err && (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
               {err}
@@ -71,22 +94,15 @@ export default function Login() {
             disabled={loading}
             className="w-full rounded-xl bg-emerald-500 px-4 py-3 font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-60"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Creating..." : "Create Account"}
           </button>
 
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-400">
-              Tip: Use backend user like{" "}
-              <span className="text-slate-200">admin@test.com</span>
-            </p>
-
-            <Link
-              className="text-sm text-emerald-400 hover:underline"
-              to="/signup"
-            >
-              Create account
+          <p className="text-sm text-slate-400">
+            Already have an account?{" "}
+            <Link className="text-emerald-400 hover:underline" to="/login">
+              Sign In
             </Link>
-          </div>
+          </p>
         </form>
       </div>
     </div>

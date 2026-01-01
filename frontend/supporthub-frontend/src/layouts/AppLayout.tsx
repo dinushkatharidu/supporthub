@@ -1,8 +1,20 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Ticket, LogOut } from "lucide-react";
 import Button from "../components/Button";
+import { useAuth } from "../auth/AuthContext";
 
 export default function AppLayout() {
+  const { user, logout } = useAuth();
+  const nav = useNavigate();
+
+  function onLogout() {
+    logout();
+    nav("/login", { replace: true });
+  }
+
+  const roleText = user?.roles?.[0] ?? "USER";
+  const emailText = user?.email ?? "Unknown";
+
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-6">
@@ -31,7 +43,11 @@ export default function AppLayout() {
             </nav>
 
             <div className="mt-6 border-t border-white/10 pt-4">
-              <Button variant="ghost" className="w-full justify-start">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={onLogout}
+              >
                 <LogOut size={18} />
                 Logout
               </Button>
@@ -39,7 +55,7 @@ export default function AppLayout() {
           </aside>
 
           <main className="space-y-6">
-            <Topbar />
+            <Topbar email={emailText} role={roleText} />
             <Outlet />
           </main>
         </div>
@@ -74,7 +90,7 @@ function SideLink({
   );
 }
 
-function Topbar() {
+function Topbar({ email, role }: { email: string; role: string }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-[rgb(var(--card))] shadow-[0_10px_30px_rgba(0,0,0,0.25)] px-4 py-3 flex items-center justify-between">
       <div>
@@ -84,8 +100,8 @@ function Topbar() {
 
       <div className="flex items-center gap-2">
         <div className="hidden sm:block text-right">
-          <p className="text-sm font-semibold">A.S.D. Tharidu</p>
-          <p className="text-xs text-slate-400">USER</p>
+          <p className="text-sm font-semibold">{email}</p>
+          <p className="text-xs text-slate-400">{role}</p>
         </div>
         <div className="h-10 w-10 rounded-xl bg-white/10 border border-white/10" />
       </div>
