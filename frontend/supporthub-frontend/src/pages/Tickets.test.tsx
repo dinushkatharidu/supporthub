@@ -4,7 +4,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import TicketsPage from "./Tickets";
 
-// mock toast
 vi.mock("react-hot-toast", () => ({
   default: {
     error: vi.fn(),
@@ -31,7 +30,7 @@ describe("TicketsPage", () => {
     mockFetchTickets.mockResolvedValueOnce({
       content: [
         {
-          id: 1,
+          id: "a1b2c3d4e5f6g7h8", // ✅ string id
           title: "Printer not working",
           status: "OPEN",
           priority: "MED",
@@ -43,7 +42,7 @@ describe("TicketsPage", () => {
     render(<TicketsPage />);
 
     expect(await screen.findByText(/printer not working/i)).toBeInTheDocument();
-    expect(mockFetchTickets).toHaveBeenCalled();
+    expect(mockFetchTickets).toHaveBeenCalledTimes(1);
   });
 
   it("shows empty state when no tickets", async () => {
@@ -56,11 +55,12 @@ describe("TicketsPage", () => {
 
   it("shows toast error when api fails", async () => {
     const toast = (await import("react-hot-toast")).default;
+
     mockFetchTickets.mockRejectedValueOnce(new Error("boom"));
 
     render(<TicketsPage />);
 
-    // wait UI settle
+    // page title exists, then toast should be called
     await screen.findByText(/tickets/i);
     expect(toast.error).toHaveBeenCalled();
   });
@@ -69,7 +69,7 @@ describe("TicketsPage", () => {
     mockFetchTickets.mockResolvedValueOnce({ content: [] });
 
     mockCreateTicket.mockResolvedValueOnce({
-      id: 2,
+      id: "zz11yy22xx33ww44", // ✅ string id
       title: "New ticket",
       status: "OPEN",
       priority: "MED",
@@ -79,26 +79,21 @@ describe("TicketsPage", () => {
     const user = userEvent.setup();
     render(<TicketsPage />);
 
-    // open modal (your UI uses Plus button; easiest: match by text if exists)
-    // If your button has text like "New Ticket" use that.
-    // Otherwise add aria-label to the plus button: aria-label="New Ticket"
-    const openBtn =
-      screen.queryByRole("button", { name: /new ticket|create ticket|add/i }) ??
-      screen.getAllByRole("button")[0];
+    // open modal via button
+    await user.click(screen.getByRole("button", { name: /create ticket/i }));
 
-    await user.click(openBtn);
+    // ✅ unique modal text (avoids "Create Ticket" duplicate)
+    expect(
+      await screen.findByText(/add a new support request/i)
+    ).toBeInTheDocument();
 
-    expect(await screen.findByText(/create ticket/i)).toBeInTheDocument();
-
-    // type title (best: add aria-label="Title" to Input in modal)
-    const titleInput =
-      screen.queryByRole("textbox", { name: /title/i }) ??
-      screen.getByRole("textbox");
-
+    // modal title input uses placeholder
+    const titleInput = screen.getByPlaceholderText(/cannot login/i);
     await user.type(titleInput, "New ticket");
+
     await user.click(screen.getByRole("button", { name: /^create$/i }));
 
-    expect(mockCreateTicket).toHaveBeenCalled();
+    expect(mockCreateTicket).toHaveBeenCalledTimes(1);
     expect(await screen.findByText(/new ticket/i)).toBeInTheDocument();
   });
 });

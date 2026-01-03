@@ -40,9 +40,13 @@ export default function Login() {
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
-            <label className="text-sm text-slate-300">Email</label>
+            <label htmlFor="email" className="text-sm text-slate-300">
+              Email
+            </label>
             <input
               className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500/40"
+              id="email"
+              name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
@@ -51,9 +55,13 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="text-sm text-slate-300">Password</label>
+            <label htmlFor="password" className="text-sm text-slate-300">
+              Password
+            </label>
             <input
               className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500/40"
+              id="password"
+              name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"

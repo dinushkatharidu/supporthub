@@ -1,18 +1,18 @@
-import React from "react";
+import React, { act } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import Login from "./Login";
 
-// ---- Mock AuthContext ----
+/* ------------------ mocks ------------------ */
+
 const mockLogin = vi.fn();
 
 vi.mock("../auth/AuthContext", () => ({
   useAuth: () => ({ login: mockLogin }),
 }));
 
-// ---- Mock react-router-dom useNavigate ----
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async () => {
@@ -22,6 +22,8 @@ vi.mock("react-router-dom", async () => {
     useNavigate: () => mockNavigate,
   };
 });
+
+/* ------------------ tests ------------------ */
 
 describe("Login", () => {
   beforeEach(() => {
@@ -38,7 +40,6 @@ describe("Login", () => {
     expect(screen.getByText("SupportHub")).toBeInTheDocument();
     expect(screen.getByText(/sign in to manage tickets/i)).toBeInTheDocument();
 
-    // After you add htmlFor/id (recommended), these will work:
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
 
@@ -48,6 +49,28 @@ describe("Login", () => {
     expect(
       screen.getByRole("link", { name: /create account/i })
     ).toBeInTheDocument();
+  });
+
+  it("allows typing email and password", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    const email = screen.getByLabelText(/email/i);
+    const password = screen.getByLabelText(/password/i);
+
+    await user.clear(email);
+    await user.type(email, "user@test.com");
+
+    await user.clear(password);
+    await user.type(password, "pass123");
+
+    expect(email).toHaveValue("user@test.com");
+    expect(password).toHaveValue("pass123");
   });
 
   it("submits with default values and navigates to / on success", async () => {
@@ -64,31 +87,7 @@ describe("Login", () => {
 
     expect(mockLogin).toHaveBeenCalledTimes(1);
     expect(mockLogin).toHaveBeenCalledWith("admin@test.com", "123456");
-
     expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });
-  });
-
-  it("allows typing email and password", async () => {
-    const user = userEvent.setup();
-
-    render(
-      <MemoryRouter>
-        <Login />
-      </MemoryRouter>
-    );
-
-    const email = screen.getByLabelText(/email/i);
-    const password = screen.getByLabelText(/password/i);
-
-    // clear defaults then type
-    await user.clear(email);
-    await user.type(email, "user@test.com");
-
-    await user.clear(password);
-    await user.type(password, "pass123");
-
-    expect(email).toHaveValue("user@test.com");
-    expect(password).toHaveValue("pass123");
   });
 
   it("shows error message when login fails", async () => {
@@ -112,7 +111,6 @@ describe("Login", () => {
 
   it("shows 'Login failed' when backend message is missing", async () => {
     mockLogin.mockRejectedValueOnce(new Error("boom"));
-
     const user = userEvent.setup();
 
     render(
@@ -128,8 +126,9 @@ describe("Login", () => {
   });
 
   it("disables button and shows Signing in... while loading", async () => {
-    // make login pending until we resolve it
-    let resolveFn: (v?: any) => void = () => {};
+    // ✅ resolve accepts a value -> make our function accept optional value too
+    let resolveFn: (value?: unknown) => void = () => {};
+
     mockLogin.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
@@ -145,13 +144,12 @@ describe("Login", () => {
       </MemoryRouter>
     );
 
-    const btn = screen.getByRole("button", { name: /sign in/i });
-    await user.click(btn);
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-    // loading UI
     expect(screen.getByRole("button", { name: /signing in/i })).toBeDisabled();
 
-    // finish promise
-    resolveFn();
+    await act(async () => {
+      resolveFn(undefined);
+    });
   });
 });
