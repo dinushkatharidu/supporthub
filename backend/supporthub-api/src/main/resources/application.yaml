@@ -14,3 +14,11 @@ server:
 logging:
   level:
     org.springframework.data.neo4j: INFO
+
+app:
+  jwt:
+    secret: THIS_IS_A_DEMO_SECRET_KEY_32_CHARS_MIN_123456
+    expiry-ms: 86400000
+
+
+

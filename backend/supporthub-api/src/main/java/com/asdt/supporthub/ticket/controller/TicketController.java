@@ -1,6 +1,7 @@
 package com.asdt.supporthub.ticket.controller;
 import com.asdt.supporthub.ticket.dto.CreateTicketRequest;
 import com.asdt.supporthub.ticket.dto.TicketResponse;
+import com.asdt.supporthub.ticket.dto.TicketStatsResponse;
 import com.asdt.supporthub.ticket.dto.UpdateStatusRequest;
 import com.asdt.supporthub.ticket.service.TicketService;
 import jakarta.validation.Valid;
@@ -50,4 +51,10 @@ public class TicketController {
                 : Sort.Direction.DESC;
         return Sort.by(dir, field);
     }
+
+    @GetMapping("/stats")
+    public TicketStatsResponse stats() {
+        return service.stats();
+    }
+
 }

@@ -6,6 +6,7 @@ import com.asdt.supporthub.ticket.domain.Ticket;
 import com.asdt.supporthub.ticket.domain.TicketStatus;
 import com.asdt.supporthub.ticket.dto.CreateTicketRequest;
 import com.asdt.supporthub.ticket.dto.TicketResponse;
+import com.asdt.supporthub.ticket.dto.TicketStatsResponse;
 import com.asdt.supporthub.ticket.dto.UpdateStatusRequest;
 import com.asdt.supporthub.ticket.repository.TicketRepository;
 import org.springframework.data.domain.Page;
@@ -58,6 +59,15 @@ public class TicketService {
             throw new BadRequestException("Invalid status transition: " + current + " -> " + next);
         }
     }
+
+    public TicketStatsResponse stats() {
+        return new TicketStatsResponse(
+                repo.countOpen(),
+                repo.countInProgress(),
+                repo.countResolved()
+        );
+    }
+
 
     private TicketResponse toResponse(Ticket t) {
         return new TicketResponse(t.getId(), t.getTitle(), t.getPriority(), t.getStatus(), t.getCreatedAt());
