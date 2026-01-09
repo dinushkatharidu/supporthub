@@ -1,6 +1,6 @@
 import Card from "../components/Card";
 import { useEffect, useState } from "react";
-import { fetchTicketStats } from "../api/tickets"; // path might be ../api/tickets
+import { fetchTicketStats } from "../api/tickets"; 
 
 
 export default function Dashboard() {
